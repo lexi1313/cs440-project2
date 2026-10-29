@@ -4,7 +4,6 @@ This repo sets up Claude Code's context for a vacuum robot that will learn to na
 
 ## Project Structure
 ```
-cs440-write/
 ├── .claude/
 │   ├── CLAUDE.md                 # Project memory - loaded every session
 │   └── context/
