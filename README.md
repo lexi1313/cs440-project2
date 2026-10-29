@@ -1,6 +1,6 @@
 # CS440 Lab 04
 
-### Group 1: Alexa Tchakar, Jacob St Lawrence, Alyssa Bennett
+#### Group 1: Alexa Tchakar, Jacob St Lawrence, Alyssa Bennett
 
 This lab explores two context engineering strategies, [Write](https://github.com/alyssakbennett/cs440-lab04/tree/main/write) and 
 [Isolate](https://github.com/alyssakbennett/cs440-lab04/tree/main/isolate) using Claude Code to prepare a vacuum robot project for 
