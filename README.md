@@ -1,5 +1,34 @@
-# CS440 Lab 04
+# CS440 Lab 05
+#### Group 1: Alexa Tchakar, Jacob St Lawrence, Alyssa Bennett
+This lab uses Claude to solve Lab 04 using hooks, skills, and sub-agents.
 
+## Structure 
+```
+├── isolate/
+  ├── .claude/
+  │   ├── CLAUDE.md                 # Project memory - loaded every session
+  │   ├── settings.json             # Registers hook with Claude
+  │   └── context/    
+  │       └── environment.md        # Grid details - imported by CLAUDE.md
+  ├── src/                          
+  │   └── vacuum_env.py/            # environment for vacuum
+  ├── tests/                        # AIMA reference code 
+      └── test_env.py/              # tests called by hooks in settings.json
+  └── README.md
+```
+
+## Hooks
+This repo uses a **PostToolUse** hook in `.claude/settings.json`. Each time Claude edits a file, the hook runs `tests/test_env.py` without the need for a command. The test in `test_env.py` checks the hyperparameters set in `src/vacuum_env.py` (living reward, discount factor, learning rate, and epsilon). If the test fails, the hook exits with code 2, and Claude fixes the error; otherwise, Claude sees that the tests pass and continues working. With this format, any mistakes will be identified right away. 
+
+To run the same check manually (from the `isolate` folder): `python3 -B tests/test_env.py`
+
+## Skills
+
+## Sub Agents
+
+
+
+# CS440 Lab 04
 #### Group 1: Alexa Tchakar, Jacob St Lawrence, Alyssa Bennett
 
 This lab explores two context engineering strategies, [Write](https://github.com/alyssakbennett/cs440-lab04/tree/main/write) and 
