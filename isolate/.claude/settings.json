@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && python3 -B tests/test_env.py || exit 2",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  }
+}
