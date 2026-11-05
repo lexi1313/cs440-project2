@@ -17,14 +17,16 @@ This lab uses Claude to solve Lab 04 using hooks, skills, and sub-agents.
   └── README.md
 ```
 
+## Hyperparameters
+- **Living reward:** Every step costs -.04
+- **Discount factor:** 0.9 means future rewards matter, but reaching the goal sooner is preferred
+- **Learning rate:** 0.2 means the robot learns from each attempt and doesn't overreact if it makes one bad step
+- **Epsilon:** 0.1 means that the robot will move at random 10% of the time 
+ 
 ## Hooks
 This repo uses a **PostToolUse** hook in `.claude/settings.json`. Each time Claude edits a file, the hook runs `tests/test_env.py` without the need for a command. The test in `test_env.py` checks the hyperparameters set in `src/vacuum_env.py` (living reward, discount factor, learning rate, and epsilon). If the test fails, the hook exits with code 2, and Claude fixes the error; otherwise, Claude sees that the tests pass and continues working. With this format, any mistakes will be identified right away. 
 
 To run the same check manually (from the `isolate` folder): `python3 -B tests/test_env.py`
-
-## Skills
-
-## Sub Agents
 
 
 
