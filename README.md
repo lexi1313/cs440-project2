@@ -20,7 +20,7 @@ This lab uses Claude to solve Lab 04 using hooks, skills, and sub-agents.
 ## Hyperparameters
 - **Living reward:** Every step costs -.04
 - **Discount factor:** 0.9 means future rewards matter, but reaching the goal sooner is preferred
-- **Learning rate:** 0.2 means the robot learns from each attempt and doesn't overreact if it makes one bad step
+- **Learning rate:** 0.1 means the robot learns from each attempt and doesn't overreact if it makes one bad step
 - **Epsilon:** 0.1 means that the robot will move at random 10% of the time 
  
 ## Hooks
