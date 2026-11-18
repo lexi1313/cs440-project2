@@ -4,17 +4,31 @@ This lab uses Claude to solve Lab 04 using hooks, skills, and sub-agents.
 
 ## Structure 
 ```
+cs440-project2/
+├── sdlc/
+│   ├── 01-plan/
+│   │   └── intent.md
+│   ├── 02-design/
+│   │   └── spec.md
+│   ├── 03-build/
+│   │   └── plan.md
+│   ├── 04-test/
+│   │   └── test-report.md
+│   ├── 05-deploy/
+│   │   └── review.md
+│   └── 06-maintain/
+│       └── feedback.md
+├── mini-coding-agent/
+│   ├── mini_coding_agent.py          # Agent entry point
+│   └── skill_router.py               # Discovers, matches, and loads skills
 ├── isolate/
-  ├── .claude/
-  │   ├── CLAUDE.md                 # Project memory - loaded every session
-  │   ├── settings.json             # Registers hook with Claude
-  │   └── context/    
-  │       └── environment.md        # Grid details - imported by CLAUDE.md
-  ├── src/                          
-  │   └── vacuum_env.py/            # environment for vacuum
-  ├── tests/                        # AIMA reference code 
-      └── test_env.py/              # tests called by hooks in settings.json
-  └── README.md
+│   └── .claude/
+│       └── skills/
+│           └── vacuum-env-debugging/
+│               └── SKILL.md          # Existing Lab 5 skill instructions
+├── write/                            # Lab 4 workspace used for the demo
+├── skill_trigger.log                 # Prompts, similarity scores, and skill usage
+└── README.md                         # Project setup and demo instructions
 ```
 
 ## Hyperparameters
