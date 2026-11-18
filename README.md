@@ -1,4 +1,4 @@
-# CS440 Lab 05
+# CS440 Project 2
 #### Group 1: Alexa Tchakar, Jacob St Lawrence, Alyssa Bennett
 This lab uses Claude to solve Lab 04 using hooks, skills, and sub-agents.
 
