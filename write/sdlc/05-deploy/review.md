@@ -2,7 +2,7 @@
 
 Status: Pending implementation and review
 
-This file is the Deploy-stage review record for the Agent Skills component. Complete the findings and decision sections after the implementation and its checks are available. Do not mark a check as passed unless its evidence has been reviewed.
+This file is the Deploy-stage review record for the Agent Skills component. Do not mark a check as passed unless its evidence has been reviewed.
 
 ## Change under review
 
@@ -41,3 +41,7 @@ Pending review after implementation.
 
 Reviewer(s): TBD
 Review date: TBD
+
+## Loop Back (To Maintain Stage)
+*If any blocking issues are found, document them here so they can be moved to `06-maintain/feedback.md`.*
+- *Pending review.*
