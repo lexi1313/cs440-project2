@@ -30,6 +30,29 @@ cs440-project2/
 ├── skill_trigger.log                 # Prompts, similarity scores, and skill usage
 └── README.md                         # Project setup and demo instructions
 ```
+### intent.md
+- Defines why Project 2 adds skills to the mini coding agent and what success looks like. The goal is to use the existing Lab 5 skill on a Lab 4 task and show why the agent selected it.
+
+### spec.md
+- Describes how the agent discovers skills, checks for a match, and loads the selected `SKILL.md`. It also defines what the agent logs for each routing decision.
+
+### plan.md
+- Outlines the steps for building skill discovery, matching, instruction loading, and logging. It also explains how to test the component and verify that the Lab 5 skill is used during the Lab 4 demo.
+
+### test-report.md
+- Records the checks run against the skills component and their results. It captures what happened during the Lab 4 demo and links to the relevant log evidence.
+
+### review.md
+- Records whether the skills component meets the spec, preserves the agent’s approval checks, and produces the required logs. It captures reviewer findings, links to test and demo evidence, and records the review decision.
+
+### feedback
+- Records observations from planning and provides a place to capture results from the Lab 4 demo. It tracks missed matches, incorrect selections, and follow-up fixes.
+
+### mini_coding_agent.py
+- Runs the agent’s main loop and connects it to the skill router. When a skill matches, the agent adds its instructions to the model’s context before the next action.
+
+### skill_router.py
+- Discovers SKILL.md files and scores how closely each skill matches the task. It selects a skill when the score meets the threshold and records the routing decision.
 
 
 # CS440 Lab 05
