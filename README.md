@@ -6,8 +6,13 @@ Project 2 adds skill routing to the mini coding agent and uses the Lab 5 skill o
 ```
 cs440-project2/
 ├── mini-coding-agent/
-│   ├── mini_coding_agent.py          # Agent entry point
-│   └── skill_router.py               # Discovers, matches, and loads skills
+│   ├── mini_coding_agent.py          # Agent entry point (skills = component 7)
+│   ├── skill_router.py               # Discovers, matches, and loads skills
+│   ├── skill_trigger.log             # Prompts, similarity scores, and skill usage
+│   ├── test_skill_router.py          # Standalone router checks (T1–T6)
+│   └── tests/
+│       ├── test_mini_coding_agent.py # Upstream tests
+│       └── test_skill_integration.py # Skill routing inside the agent loop
 ├── isolate/
 │   └── .claude/
 │       └── skills/
@@ -27,7 +32,6 @@ cs440-project2/
 │     │   └── review.md
 │     └── 06-maintain/
 │         └── feedback.md
-├── skill_trigger.log                 # Prompts, similarity scores, and skill usage
 └── README.md                         # Project setup and demo instructions
 ```
 ### intent.md
@@ -54,6 +58,56 @@ cs440-project2/
 ### skill_router.py
 - Discovers SKILL.md files and scores how closely each skill matches the task. It selects a skill when the score meets the threshold and records the routing decision.
 
+
+## How it works
+1. **Prompt check.** On every user turn, `MiniAgent.ask` sends the prompt to `SkillRouter.route_skill`. The router finds every `<root>/<skill-name>/SKILL.md`, scores the prompt against each skill's `description` using token cosine similarity, and selects the top score if it is ≥ the threshold (default 0.3). Ties are broken by name, then path.
+2. **Mid-task check.** When a router is configured, the agent has a `use_skill(need)` tool. The model can call it partway through a task to run a new similarity check on its stated need.
+3. **Execution.** The selected skill's instructions go into an `Active skills:` section of the prompt, after the stable prefix and before the transcript, so the model sees them before its next action. Skills give the model instructions only. All tool validation, workspace path checks, and approval prompts still apply.
+4. **Logging.** Each check appends one JSON line to `mini-coding-agent/skill_trigger.log`. The record holds `trigger` (`user_prompt` or `agent_request`), `prompt`, `task_text`, `method`, `threshold`, every candidate's `score`, `selected_skill`, `loaded` (the instructions were in a prompt the model received), `used` (the turn finished with them active), and `outcome`. A `[skills] ...` summary line is also printed to the terminal.
+
+## How to run
+Requirements: Python 3.10+ and a model backend:
+- **Ollama** (upstream default): `ollama serve` with a model pulled (default `qwen3.5:4b`).
+- **Claude CLI** (`--backend claude`, default model `sonnet`): uses the local `claude -p` with all of its own tools, MCP servers, and settings disabled. It returns text only, and every action still goes through the mini agent's tools and approvals. The recorded Lab 4 run used this backend: [write/sdlc/04-test/lab4-demo-run.txt](write/sdlc/04-test/lab4-demo-run.txt).
+- AIMA's `mdp.py` needs `numpy` (`pip install -r write/requirements.txt`) so the agent can execute the Lab 4 cell.
+
+```bash
+ollama serve &              # if it isn't already running
+ollama pull qwen3.5:4b
+
+# Lab 4 demo: Write workspace + Lab 5 skill (run from the repository root)
+python3 mini-coding-agent/mini_coding_agent.py \
+  --cwd . \
+  --skills-dir isolate/.claude/skills \
+  --approval ask \
+  "Help with the Lab 4 vacuum robot environment setup: check the grid rules, actions, and coordinate mapping in write/.claude/context/environment.md"
+
+# Same demo with the Claude CLI backend (what produced lab4-demo-run.txt)
+python3 mini-coding-agent/mini_coding_agent.py --backend claude --cwd . \
+  --skills-dir isolate/.claude/skills --approval ask --max-steps 20 --max-new-tokens 4096 \
+  "Solve Lab 4 for the vacuum robot: set up the 4x4 grid environment in the Lab 4 cell of write/reinforcement_learning.ipynb using the Write project context (grid rules, actions, coordinate mapping). Do not implement Q-learning. Verify the cell actually runs by executing its code with python3 from the write folder."
+
+# View the log (latest record)
+tail -n 1 mini-coding-agent/skill_trigger.log | python3 -m json.tool
+```
+
+| Flag | Default | Purpose |
+| --- | --- | --- |
+| `--skills-dir` | `.claude/skills` and `skills` in the workspace | Skill folder to search (repeatable) |
+| `--skill-threshold` | `0.3` | Minimum similarity needed to load a skill |
+| `--skill-log` | `mini-coding-agent/skill_trigger.log` | Where routing records are written |
+| `--no-skills` | off | Run the original agent without skills |
+| `--backend` | `ollama` | `ollama` or `claude` |
+| `--quiet` | off | Hide the per-step `[step N]` trace |
+
+Use `--cwd .` (the repo root). The agent's file tools resolve paths from the git root, and the skill refers to `write/...` paths. With `--cwd write`, the model sees `write` as its cwd and wastes steps on paths that don't resolve.
+
+Tests (no Ollama needed):
+```bash
+cd mini-coding-agent
+python3 -m pytest -q tests     # 26 tests: 19 upstream + 7 skill integration
+python3 test_skill_router.py   # standalone router checks
+```
 
 # CS440 Lab 05
 #### Group 1: Alexa Tchakar, Jacob St Lawrence, Alyssa Bennett

@@ -1,0 +1,5 @@
+.mini-coding-agent/
+__pycache__/
+*.tmp
+.DS_Store
+.venv/

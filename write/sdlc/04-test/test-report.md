@@ -3,7 +3,7 @@ Agent Skills Component — Test Report
 Project: CS440 Project 2
 Component: Skill Router and Trigger Logging
 Test Date: November 18, 2026
-Status: Component testing completed; integration testing pending
+Status: Component, integration, and live Lab 4 testing completed
 
 1. Overview
 
@@ -138,22 +138,52 @@ Component Tests Passed: 6/6
 
 5. Integration Testing
 
-Integration testing is pending.
+Test file: mini-coding-agent/tests/test_skill_integration.py (pytest, uses the upstream FakeModelClient so the exact prompt sent to the model can be inspected).
+Command: cd mini-coding-agent && python -m pytest -q tests
+Result: 26 passed (19 upstream tests + 7 new integration tests, including the no-ripgrep search fallback). The upstream tests still pass, so existing behavior is unchanged.
 
-The remaining tests must verify that the mini-coding-agent:
+I1: Prompt-time delivery — a Lab 4 prompt selects vacuum-env-debugging, and the SKILL.md instructions appear in the first prompt sent to the model. Log record: trigger=user_prompt, loaded=true, used=true, outcome=completed. PASS
+I2: Unrelated prompt — "Write a poem about the ocean" produces no Active skills section; log outcome=no_match. PASS
+I3: In-turn request — the model calls use_skill(need=...) mid-task; the instructions are absent from the first prompt and present in the second. Log record: trigger=agent_request, with both the original prompt and the need text. PASS
+I4: Permissions preserved — with approval=never, a write_file call after the skill loads is still denied and no file is written. PASS
+I5: Malformed skill — a broken SKILL.md is recorded in errors while the valid skill is still selected and the agent finishes. PASS
+I6: Per-turn reset — a skill loaded for one turn is not carried into an unrelated next turn. PASS
 
-1. Invokes the router when processing user prompts.
-2. Loads selected skill instructions into the model’s context before the relevant action.
-3. Performs additional routing checks when a need arises during execution.
-4. Records actual skill loading and usage outcomes.
+CLI smoke test (no Ollama installed): the router printed "[skills] user_prompt check: vacuum-env-debugging=0.655 (threshold 0.3) -> selected vacuum-env-debugging", the model call failed, and the record was closed with outcome=not_delivered:error, loaded=false. This confirms the log separates selection from delivery.
 
-These behaviors cannot be verified through standalone router tests alone.
+Threshold check (token cosine against the skill description):
+
+| Prompt | Score | Selected at 0.3 |
+| --- | --- | --- |
+| Help with the Lab 4 vacuum robot environment setup: check the grid rules, actions, and coordinate mapping in the Write project context | 0.655 | yes |
+| Set up the Lab 4 vacuum robot environment in the notebook using the Write strategy context | 0.523 | yes |
+| Finish the Lab 4 setup for the vacuum robot | 0.522 | yes |
+| Debug why the vacuum robot environment lets the robot move into the obstacle | 0.346 | yes |
+| Solve Lab 4 | 0.333 | yes |
+| Write a poem about the ocean | 0.236 | no |
+| Fix the README typo in the setup section | 0.228 | no |
+| Add a binary search function with tests | 0.109 | no |
 
 6. Lab 4 Demonstration
 
-The required demonstration of using the Lab 5 vacuum-env-debugging skill to assist with Lab 4 is pending.
+Date: November 19, 2026. Backend: `claude -p` (Sonnet) via `--backend claude`, because Ollama was not installed on the demo machine. Approval: auto (non-interactive run). Full terminal output: [lab4-demo-run.txt](lab4-demo-run.txt).
 
-The demonstration must verify that the agent follows the applicable skill instructions and respects the Lab 4 project constraints.
+Command (from the repository root):
+
+python3 mini-coding-agent/mini_coding_agent.py --backend claude --model sonnet --cwd . --skills-dir isolate/.claude/skills --approval auto --max-steps 20 --max-new-tokens 4096 "Solve Lab 4 for the vacuum robot: set up the 4x4 grid environment in the Lab 4 cell of write/reinforcement_learning.ipynb using the Write project context (grid rules, actions, coordinate mapping). Do not implement Q-learning. Verify the cell actually runs by executing its code with python3 from the write folder."
+
+| Attempt | Result | Cause / action |
+| --- | --- | --- |
+| 1 (14 steps) | Skill selected (0.593). Cell written, but it used `GridMDP` without importing it; the notebook never imports `GridMDP`, so it would fail in Jupyter. Hit the step limit while re-checking. | Notebook reverted. Prompt now asks for execution-based verification, which the skill also requires. |
+| 2 (20 steps) | Skill selected (0.551). Re-read the same files 9 times and never wrote. | Upstream history compression cut each read to 900 chars (180 once older). History limits raised; transcript clipping now keeps the newest steps. |
+| 3 (20 steps) | Skill selected (0.551). Followed the skill's "Before acting" steps, read AIMA `mdp.py`, wrote the Lab 4 cell (with `from aima.mdp import GridMDP`), executed it (exit 0), and returned a final summary. | Accepted, but it took 19 steps. |
+| 4 (`--cwd .`, 7 steps) | Skill selected (0.551). Read CLAUDE.md and environment.md, found the Lab 4 cell, patched it, executed it (exit 0), and returned a final summary. No failed tool calls. | **Final run.** A run from a regular terminal with `--cwd write` showed two more causes of wasted steps: tool paths resolve from the git root, and with no `rg` installed, the fallback `search` treated regex patterns as literal text. The fallback now uses regex (new test), and the demo uses `--cwd .`. Transcript: [lab4-demo-run.txt](lab4-demo-run.txt). |
+
+Independent verification of the final run (attempt 4; attempt 3 checked the same way) (not relying on the agent's report):
+- The notebook still parses (56 cells, nbformat 4). Only cell 55 changed.
+- Running cell 55 after the notebook's own import cell prints init (0, 3), terminals [(1, 0), (3, 0)], obstacle (1, 2) excluded, 15 states, R(penalty) = -1, R(goal) = 10. All of these match write/.claude/context/environment.md.
+- reinforcement_learning.py and aima/ are unchanged. No Q-learning code was added. No T or R matrix was invented.
+- Log record (last line of skill_trigger.log): trigger=user_prompt, score 0.551246, threshold 0.3, selected_skill=vacuum-env-debugging, loaded=true, used=true, outcome=completed.
 
 7. Known Limitations
 
