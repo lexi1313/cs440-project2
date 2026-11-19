@@ -5,19 +5,6 @@ Project 2 adds skill routing to the mini coding agent and uses the Lab 5 skill o
 ## Structure 
 ```
 cs440-project2/
-├── sdlc/
-│   ├── 01-plan/
-│   │   └── intent.md
-│   ├── 02-design/
-│   │   └── spec.md
-│   ├── 03-build/
-│   │   └── plan.md
-│   ├── 04-test/
-│   │   └── test-report.md
-│   ├── 05-deploy/
-│   │   └── review.md
-│   └── 06-maintain/
-│       └── feedback.md
 ├── mini-coding-agent/
 │   ├── mini_coding_agent.py          # Agent entry point
 │   └── skill_router.py               # Discovers, matches, and loads skills
@@ -27,6 +14,19 @@ cs440-project2/
 │           └── vacuum-env-debugging/
 │               └── SKILL.md          # Existing Lab 5 skill instructions
 ├── write/                            # Lab 4 workspace used for the demo
+│   ├── sdlc/
+│     ├── 01-plan/
+│     │   └── intent.md
+│     ├── 02-design/
+│     │   └── spec.md
+│     ├── 03-build/
+│     │   └── plan.md
+│     ├── 04-test/
+│     │   └── test-report.md
+│     ├── 05-deploy/
+│     │   └── review.md
+│     └── 06-maintain/
+│         └── feedback.md
 ├── skill_trigger.log                 # Prompts, similarity scores, and skill usage
 └── README.md                         # Project setup and demo instructions
 ```
