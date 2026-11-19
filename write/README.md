@@ -8,7 +8,20 @@ This repo sets up Claude Code's context for a vacuum robot that will learn to na
 │   ├── CLAUDE.md                 # Project memory - loaded every session
 │   └── context/
 │       └── environment.md        # Grid details - imported by CLAUDE.md
-├── aima/                         # AIMA reference code 
+├── aima/                         # AIMA reference code
+├── sdlc/
+│     ├── 01-plan/
+│     │   └── intent.md
+│     ├── 02-design/
+│     │   └── spec.md
+│     ├── 03-build/
+│     │   └── plan.md
+│     ├── 04-test/
+│     │   └── test-report.md
+│     ├── 05-deploy/
+│     │   └── review.md
+│     └── 06-maintain/
+│         └── feedback.md
 ├── reinforcement_learning.ipynb  # Main notebook; Lab 4 work will go here
 ├── reinforcement_learning.py     # Auto-generated from the notebook; will not be edited
 ├── bootstrap.ipynb               
