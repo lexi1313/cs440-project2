@@ -14,12 +14,15 @@ class SkillRouter:
     relevant skill based on the current task.
     """
 
-    def __init__(self, skill_roots, threshold=0.2,
-                 log_path="skill_trigger.log"):
+    def __init__(self, skill_roots, threshold=0.3,
+                 log_path="skill_trigger.log", echo=None):
 
         self.skill_roots = [Path(root).resolve() for root in skill_roots]
         self.threshold = threshold
         self.log_path = Path(log_path)
+        # Optional callable(str) used to show routing decisions live
+        # (the CLI passes a stderr printer; tests leave it as None).
+        self.echo = echo
 
         if not 0 <= threshold <= 1:
             raise ValueError("Threshold must be between 0 and 1.")
@@ -158,13 +161,20 @@ class SkillRouter:
         return similarity
 
 
-    def route_skill(self, prompt):
+    def route_skill(self, prompt, task_text=None, trigger="user_prompt"):
         """
         Finds the most relevant skill for a prompt.
+
+        prompt is the user's request for this turn. task_text is the
+        text actually scored; it defaults to the prompt, and is set to
+        the agent's stated need when the agent asks for a skill during
+        execution (trigger="agent_request").
 
         Returns the selected skill and its instructions,
         or None when no skill meets the threshold.
         """
+
+        task_text = prompt if task_text is None else task_text
 
         skills, errors = self.discover_skills()
 
@@ -173,7 +183,7 @@ class SkillRouter:
         for skill in skills:
 
             score = self.calculate_similarity(
-                prompt,
+                task_text,
                 skill["description"]
             )
 
@@ -209,7 +219,9 @@ class SkillRouter:
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "session_id": self.session_id,
             "decision_id": decision_id,
+            "trigger": trigger,
             "prompt": prompt,
+            "task_text": task_text,
             "method": "token_cosine",
             "threshold": self.threshold,
             "candidates": candidates,
@@ -230,6 +242,19 @@ class SkillRouter:
         }
 
         self.log_routing(record)
+
+        if self.echo:
+            scores = ", ".join(
+                f"{c['name']}={c['score']:.3f}" for c in candidates
+            ) or "no skills found"
+            verdict = (
+                f"selected {selected_skill['name']}"
+                if selected_skill else "no match"
+            )
+            self.echo(
+                f"[skills] {trigger} check: {scores} "
+                f"(threshold {self.threshold}) -> {verdict}"
+            )
 
         return {
             "decision_id": decision_id,
@@ -281,6 +306,9 @@ class SkillRouter:
                     record["loaded"] = bool(loaded)
                     record["used"] = bool(used)
                     record["outcome"] = outcome
+                    record["updated_at"] = datetime.now(
+                        timezone.utc
+                    ).isoformat()
 
                     found = True
 

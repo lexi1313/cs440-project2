@@ -1,6 +1,6 @@
 # Project 2 Review Record
 
-Status: Pending implementation and review
+Status: Implementation and live Lab 4 run complete; awaiting group sign-off
 
 This file is the Deploy-stage review record for the Agent Skills component. Do not mark a check as passed unless its evidence has been reviewed.
 
@@ -27,13 +27,18 @@ This file is the Deploy-stage review record for the Agent Skills component. Do n
 
 Record each finding with severity, file or behavior, evidence, and resolution.
 
-- Pending implementation.
+- Low, threshold: the initial 0.2 threshold selected the skill for an unrelated prompt (score 0.236). Resolved by raising it to 0.3, which is now the CLI default (`--skill-threshold`). See the threshold table in the test report.
+- Medium, logging: a selected skill whose model call failed stayed `pending` in the log forever. Resolved: `finish_skills` closes the record as `not_delivered:<outcome>` with `loaded=false`.
+- Low, prompt text: the rules mention "Active skills", so tests must check for the section header `Active skills:\n` and not just the phrase. Resolved in `test_skill_integration.py`.
+- Medium, upstream context reduction: during the live run, the agent re-read `environment.md` 9 times and never acted, because history showed only 900 chars per read (180 once older) and `clip()` dropped the newest steps once over 12,000 chars. Resolved in `history_text`: limits are now 2,500/600 chars, a 20,000-char cap, and the tail is kept. All 25 tests still pass.
+- Medium, Lab 4 output: the first live attempt used `GridMDP` without importing it. Caught by running the cell. The accepted run imports it and was executed by both the agent and the reviewer.
+- Open, workspace root: `--cwd write` resolves to the git root (`cs440-project2/`) because upstream `WorkspaceContext` uses `git rev-parse --show-toplevel`. Tool path checks are therefore bounded by the repo root, not by `write/`. This is upstream behavior and was left unchanged; the skill instructions point the agent at `write/...` paths.
 
 ## Verification evidence
 
-- Tests run: Pending implementation.
-- Lab 4 demonstration: Pending implementation.
-- Skill routing log: Pending implementation.
+- Tests run: `cd mini-coding-agent && python -m pytest -q tests` -> 25 passed. `python3 test_skill_router.py` -> T1 to T6 pass. See [test-report.md](../04-test/test-report.md).
+- Lab 4 demonstration: [lab4-demo-run.txt](../04-test/lab4-demo-run.txt) and test report section 6 (3 attempts, last one accepted and independently re-run).
+- Skill routing log: `mini-coding-agent/skill_trigger.log` (JSON Lines, one record per routing check).
 
 ## Review decision
 
